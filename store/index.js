@@ -9,6 +9,19 @@ const createStore = () => {
     mutations: {
       setPosts(state, posts) {
         state.loadedPosts = posts
+      },
+      addPost(state, post) {
+        // Simply push the post parameter to the store. post goes in loadedPosts array.
+        state.loadedPosts.push(post)
+      },
+      editPost(state, editedPost) {
+        // 1. Assign postIndex variable
+        // 2. Perform a check where the post in the store is equal to the editedPost param (post which user chooses)
+        // 3. Assign the current index of the post in the store to the editedPost params, mentioned in step 2.
+        const postIndex = state.loadedPosts.findIndex(
+          post => post.id === editedPost.id
+        )
+        state.loadedPosts[postIndex] = editedPost
       }
     },
     actions: {
@@ -30,6 +43,25 @@ const createStore = () => {
             vuexContext.commit('setPosts', postsArray)
           })
           .catch(error => context.error(error));
+      },
+      addPost(vuexContext, post) {
+        const createdPost = {
+          ...post,
+          updatedDate: new Date()
+        }
+        return axios
+        .post('https://nuxt-blog-777.firebaseio.com/posts.json', createdPost)
+        .then(result => {
+          vuexContext.commit('addPost', {...createdPost, id: result.data.name})
+        })
+        .catch(error => console.log(error))
+      },
+      editPost(vuexContext, editedPost) {
+        return axios.put('https://nuxt-blog-777.firebaseio.com/posts' + editedPost.id + '.json', editedPost)
+        .then(res => {
+          vuexContext.commit('editPost', editedPost)
+        })
+        .catch(error => console.log(error))
       },
       setPosts(vuexContext, posts) {
         vuexContext.commit('setPosts', posts)
