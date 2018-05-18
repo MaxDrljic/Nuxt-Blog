@@ -15,23 +15,19 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   // asyncData is only available in Page components.
   
-  asyncData(context, callback) {
-    setTimeout(() => {
-      callback(null, {
-        loadedPost: {
-          id: '1',
-          title: "First Post (ID: " + context.route.params.id + ")",
-          previewText: "This is my first post!",
-          author: 'Max',
-          updatedDate: new Date(),
-          content: 'Some dummy text which is definitely not the preview text, so yes.',
-          thumbnail: "http://nerdsmagazine.com/wp-content/uploads/2013/07/tech_a_by_burnwell88-d4xz7ah.jpg"
-        },
-      });
-    }, 1000);
+  asyncData(context) {
+    return axios.get('https://nuxt-blog-777.firebaseio.com/posts/' + context.params.id + '.json')
+      .then(res => {
+        return {
+          loadedPost: res.data
+        }
+      })
+      .catch(error => context.error(error))
   }
 }
 </script>

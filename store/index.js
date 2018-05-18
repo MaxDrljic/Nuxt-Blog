@@ -1,4 +1,5 @@
 import Vuex from 'vuex'
+import axios from 'axios'
 
 const createStore = () => {
   return new Vuex.Store({
@@ -19,25 +20,16 @@ const createStore = () => {
       // fetch is similar to asyncData, but insted of saving it to the data object, data can be saved in the store, with the commit() method.
 
       nuxtServerInit(vuexContext, context) {
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            vuexContext.commit('setPosts', [
-                {
-                  id: '1',
-                  title: "First Post",
-                  previewText: "This is my first post!",
-                  thumbnail: "http://nerdsmagazine.com/wp-content/uploads/2013/07/tech_a_by_burnwell88-d4xz7ah.jpg"
-                },
-                {
-                  id: '2',
-                  title: "Second Post",
-                  previewText: "This is my second post!",
-                  thumbnail: "http://nerdsmagazine.com/wp-content/uploads/2013/07/tech_a_by_burnwell88-d4xz7ah.jpg"
-                }
-              ]);
-           resolve();
-         }, 1000);
-        });
+        return axios.get('https://nuxt-blog-777.firebaseio.com/posts.json')
+          .then(res => {
+            // Iterating through object with for/in loop and pushing it to the array.
+            const postsArray = []
+            for (const key in res.data) {
+              postsArray.push({...res.data[key], id: key })
+            }
+            vuexContext.commit('setPosts', postsArray)
+          })
+          .catch(error => context.error(error));
       },
       setPosts(vuexContext, posts) {
         vuexContext.commit('setPosts', posts)
