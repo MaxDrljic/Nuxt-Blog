@@ -33,7 +33,7 @@ const createStore = () => {
       // fetch is similar to asyncData, but insted of saving it to the data object, data can be saved in the store, with the commit() method.
 
       nuxtServerInit(vuexContext, context) {
-        return axios.get('https://nuxt-blog-777.firebaseio.com/posts.json')
+        return axios.get(process.env.baseUrl + '/posts.json')
           .then(res => {
             // Iterating through object with for/in loop and pushing it to the array.
             const postsArray = []

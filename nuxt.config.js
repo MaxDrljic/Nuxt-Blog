@@ -22,12 +22,13 @@ module.exports = {
   /*
   ** Customize the progress-bar color
   */
-  loading: { color: '#FFFFFF' },
+  loading: { color: '#FFFFFF', height: '3px', duration: 5000},
 
   /*
   ** Global CSS
   */
   css: [
+    '~assets/styles/main.css'
   ],
 
   /*
@@ -52,5 +53,12 @@ module.exports = {
     extend(config, ctx) {
       
     }
+  },
+  env: {
+    baseUrl: process.env.BASE_URL || 'https://nuxt-blog-777.firebaseio.com'
+  },
+  transition: {
+    name: 'fade',
+    mode: 'out-in'
   }
 }

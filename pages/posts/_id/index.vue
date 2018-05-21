@@ -21,7 +21,7 @@ export default {
   // asyncData is only available in Page components.
   
   asyncData(context) {
-    return axios.get('https://nuxt-blog-777.firebaseio.com/posts/' + context.params.id + '.json')
+    return axios.get(process.env.baseUrl + '/posts/' + context.params.id + '.json')
       .then(res => {
         return {
           loadedPost: res.data
