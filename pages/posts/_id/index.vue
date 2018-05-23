@@ -15,16 +15,15 @@
 </template>
 
 <script>
-import axios from 'axios'
-
 export default {
   // asyncData is only available in Page components.
   
   asyncData(context) {
-    return axios.get(process.env.baseUrl + '/posts/' + context.params.id + '.json')
-      .then(res => {
+    // context.app.$axios is used because of asyncData. It is running on the server
+    return context.app.$axios.$get('/posts/' + context.params.id + '.json')
+      .then(data => {
         return {
-          loadedPost: res.data
+          loadedPost: data
         }
       })
       .catch(error => context.error(error))

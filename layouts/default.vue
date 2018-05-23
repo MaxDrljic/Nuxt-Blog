@@ -13,6 +13,8 @@ import TheHeader from '@/components/Navigation/TheHeader'
 import TheSidenav from '@/components/Navigation/TheSidenav'
 
 export default {
+  // Refers to middleware/log.js
+  //middleware: 'log',
   components: {
     TheHeader,
     TheSidenav

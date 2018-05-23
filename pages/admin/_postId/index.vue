@@ -8,19 +8,20 @@
 
 <script>
 import AdminPostForm from '@/components/Admin/AdminPostForm'
-import axios from 'axios';
 
 export default {
   layout: 'admin',
+  middleware: ['check-auth', 'auth'],
   components: {
     AdminPostForm
   },
-  asyncData () {
-    return axios
-      .get(process.env.baseUrl + '/posts/' + context.params.postId + '.json')
-        .then(res => {
+  asyncData (context) {
+    // context.app.$axios is used because of asyncData. It is running on the server
+    return context.app.$axios
+      .$get(process.env.baseUrl + '/posts/' + context.params.postId + '.json')
+        .then(data => {
           return {
-            loadedPost: {...res.data, id: context.params.postId}
+            loadedPost: {...data, id: context.params.postId}
           }
         })
         .catch(error => context.error())

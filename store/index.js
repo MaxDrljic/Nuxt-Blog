@@ -1,10 +1,10 @@
 import Vuex from 'vuex'
-import axios from 'axios'
 
 const createStore = () => {
   return new Vuex.Store({
     state: {
-      loadedPosts: []
+      loadedPosts: [],
+      token: null
     },
     mutations: {
       setPosts(state, posts) {
@@ -22,6 +22,12 @@ const createStore = () => {
           post => post.id === editedPost.id
         )
         state.loadedPosts[postIndex] = editedPost
+      },
+      setToken(state, token) {
+        state.token = token
+      },
+      clearToken(state) {
+        state.token = null;
       }
     },
     actions: {
@@ -33,12 +39,14 @@ const createStore = () => {
       // fetch is similar to asyncData, but insted of saving it to the data object, data can be saved in the store, with the commit() method.
 
       nuxtServerInit(vuexContext, context) {
-        return axios.get(process.env.baseUrl + '/posts.json')
-          .then(res => {
+        // context.app.$axios is used because of asyncData. It is running on the server
+        return context.app.$axios
+          .$get('/posts.json')
+          .then(data => {
             // Iterating through object with for/in loop and pushing it to the array.
             const postsArray = []
-            for (const key in res.data) {
-              postsArray.push({...res.data[key], id: key })
+            for (const key in data) {
+              postsArray.push({...data[key], id: key })
             }
             vuexContext.commit('setPosts', postsArray)
           })
@@ -49,15 +57,15 @@ const createStore = () => {
           ...post,
           updatedDate: new Date()
         }
-        return axios
-        .post('https://nuxt-blog-777.firebaseio.com/posts.json', createdPost)
-        .then(result => {
-          vuexContext.commit('addPost', {...createdPost, id: result.data.name})
+        return this.$axios
+        .$post('https://nuxt-blog-777.firebaseio.com/posts.json?auth=' + vuexContext.state.token, createdPost)
+        .then(data => {
+          vuexContext.commit('addPost', {...createdPost, id: data.name})
         })
         .catch(error => console.log(error))
       },
       editPost(vuexContext, editedPost) {
-        return axios.put('https://nuxt-blog-777.firebaseio.com/posts' + editedPost.id + '.json', editedPost)
+        return this.$axios.$put('https://nuxt-blog-777.firebaseio.com/posts' + editedPost.id + '.json?auth=' + vuexContext.state.token, editedPost)
         .then(res => {
           vuexContext.commit('editPost', editedPost)
         })
@@ -65,11 +73,52 @@ const createStore = () => {
       },
       setPosts(vuexContext, posts) {
         vuexContext.commit('setPosts', posts)
+      },
+      authenticateUser(vuexContext, authData) {
+        let authUrl = 
+        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=' + 
+        process.env.fbAPIKey
+      if (!authData.isLogin) {
+        authUrl = 
+          'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=' +
+          process.env.fbAPIKey
+      }
+      return this.$axios
+      .$post(authUrl, {
+        email: authData.email,
+        password: authData.password,
+        returnSecureToken: true
+      })
+      .then(result => {
+        vuexContext.commit('setToken', result.idToken);
+        localStorage.setItem('token', result.idToken);
+        localStorage.setItem('tokenExpiration', new Date().getTime() + result.expiresIn * 1000);
+        vuexContext.dispatch('setLogoutTimer', result.expiresIn * 1000)
+      })
+      .catch(e => console.log(e));
+      },
+      setLogoutTimer(vuexContext, duration) {
+        setTimeout(() => {
+          vuexContext.commit('clearToken')
+        }, duration)
+      },
+      initAuth(vuexContext) {
+        const token = localStorage.getItem('token');
+        const expirationDate = localStorage.getItem('tokenExpiration');
+
+        if (new Date().getTime() > +expirationDate || !token) {
+          return;
+        }
+        vuexContext.dispatch('setLogoutTimer', +expirationDate - new Date().getTime());
+        vuexContext.commit('setToken', token);
       }
     },
     getters: {
       loadedPosts(state) {
         return state.loadedPosts
+      },
+      isAuthenticated(state) {
+        return state.token != null
       }
     }
   })
