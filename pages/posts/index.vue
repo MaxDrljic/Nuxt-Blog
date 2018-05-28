@@ -7,7 +7,7 @@
 <script>
 export default {
   // Refers to middleware/log.js
-  //middleware: 'log',
+  middleware: 'log',
   computed: {
     loadedPosts() {
       return this.$store.getters.loadedPosts

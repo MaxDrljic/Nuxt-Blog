@@ -32,12 +32,12 @@ export default {
       editedPost: this.post
         ? { ...this.post }
         : {    
-        author: '',
-        title: '',
-        thumbnail: '',
-        content: '',
-        previewText: ''
-      }
+            author: '',
+            title: '',
+            thumbnail: '',
+            content: '',
+            previewText: ''
+          }
     }
   },
   methods: {
@@ -52,7 +52,3 @@ export default {
   }
 }
 </script>
-
-<style>
-
-</style>

@@ -1,5 +1,6 @@
 const pkg = require('./package')
 const bodyParser = require('body-parser')
+const axios = require('axios')
 
 module.exports = {
   mode: 'universal',
@@ -24,6 +25,10 @@ module.exports = {
   ** Customize the progress-bar color
   */
   loading: { color: '#FFFFFF', height: '3px', duration: 5000},
+  loadingIndicator: {
+    name: 'circle',
+    color: '#fa923f'
+  },
 
   /*
   ** Global CSS
@@ -58,13 +63,11 @@ module.exports = {
     /*
     ** You can extend webpack config here
     */
-    extend(config, ctx) {
-      
-    }
+    extend(config, ctx) {}
   },
   env: {
     baseUrl: process.env.BASE_URL || 'https://nuxt-blog-777.firebaseio.com',
-    fbAPIKey: 'AIzaSyBo_MLSv6KT4GWnDuAgUcAfKH9ZvCLOcv4'
+    fbAPIKey: "AIzaSyBo_MLSv6KT4GWnDuAgUcAfKH9ZvCLOcv4"
   },
   transition: {
     name: 'fade',
@@ -79,6 +82,22 @@ module.exports = {
   // Adding bodyParser & importing the server-side in api folder
   serverMiddleware : [
     bodyParser.json(),
-    '~/api'
-  ]
+    "~/api"
+  ],
+  // Used for npm run generate to grab posts from Firebase.
+  generate: {
+    routes: function() {
+      return axios.get('https://nuxt-blog-777.firebaseio.com/posts.json')
+        .then(res => {
+          const routes = []
+          for (const key in res.data) {
+            routes.push({
+              route: '/posts/' + key,
+              payload: {postData: res.data[key]}
+            })
+          }
+          return routes
+        })
+    }
+  }
 }

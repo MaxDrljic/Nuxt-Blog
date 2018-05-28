@@ -22,8 +22,8 @@ export default {
   data() {
     return {
       isLogin: true,
-      email: '',
-      password: ''
+      email: "",
+      password: ""
     }
   },
   methods: {

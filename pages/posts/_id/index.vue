@@ -17,8 +17,12 @@
 <script>
 export default {
   // asyncData is only available in Page components.
-  
   asyncData(context) {
+    if (context.payload) {
+      return {
+        loadedPost: context.payload.postData
+      }
+    }
     // context.app.$axios is used because of asyncData. It is running on the server
     return context.app.$axios.$get('/posts/' + context.params.id + '.json')
       .then(data => {
@@ -26,7 +30,10 @@ export default {
           loadedPost: data
         }
       })
-      .catch(error => context.error(error))
+      .catch(e => context.error(e))
+  },
+  head: {
+    title: 'My blog post'
   }
 }
 </script>

@@ -24,7 +24,7 @@ export default {
             loadedPost: {...data, id: context.params.postId}
           }
         })
-        .catch(error => context.error())
+        .catch(e => context.error())
   },
   methods: {
     onSubmitted(editedPost) {

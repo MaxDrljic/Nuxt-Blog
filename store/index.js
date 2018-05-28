@@ -51,7 +51,7 @@ const createStore = () => {
             }
             vuexContext.commit('setPosts', postsArray)
           })
-          .catch(error => context.error(error));
+          .catch(e => context.error(e));
       },
       addPost(vuexContext, post) {
         const createdPost = {
@@ -59,29 +59,33 @@ const createStore = () => {
           updatedDate: new Date()
         }
         return this.$axios
-        .$post('https://nuxt-blog-777.firebaseio.com/posts.json?auth=' + vuexContext.state.token, createdPost)
+        .$post('https://nuxt-blog-777.firebaseio.com/posts.json?auth=' +
+          vuexContext.state.token,
+          createdPost
+        )
         .then(data => {
           vuexContext.commit('addPost', {...createdPost, id: data.name})
         })
-        .catch(error => console.log(error))
+        .catch(e => console.log(e))
       },
       editPost(vuexContext, editedPost) {
-        return this.$axios.$put('https://nuxt-blog-777.firebaseio.com/posts' + editedPost.id + '.json?auth=' + vuexContext.state.token, editedPost)
-        .then(res => {
-          vuexContext.commit('editPost', editedPost)
-        })
-        .catch(error => console.log(error))
+        return this.$axios
+          .$put('https://nuxt-blog-777.firebaseio.com/posts' + editedPost.id + '.json?auth=' + vuexContext.state.token, editedPost)
+          .then(res => {
+            vuexContext.commit('editPost', editedPost)
+          })
+          .catch(error => console.log(error))
       },
       setPosts(vuexContext, posts) {
         vuexContext.commit('setPosts', posts)
       },
       authenticateUser(vuexContext, authData) {
         let authUrl = 
-        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=' + 
+        "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + 
         process.env.fbAPIKey
       if (!authData.isLogin) {
         authUrl = 
-          'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=' +
+          "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=" +
           process.env.fbAPIKey
       }
       return this.$axios
@@ -118,10 +122,10 @@ const createStore = () => {
             .split(';')
             .find(c => c.trim().startsWith('expirationDate='))
             .split('=')[1];
-        } else {
+        } else if (process.client) {
           token = localStorage.getItem('token');
           expirationDate = localStorage.getItem('tokenExpiration');  
-          }
+        } 
           if (new Date().getTime() > +expirationDate || !token) {
             console.log('No token or invalid token');
             vuexContext.dispatch('logout')
